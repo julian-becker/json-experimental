@@ -8,7 +8,7 @@ include(SetupCatch2)
 
 enable_testing()
 
-add_module(NAME json)
-add_module(NAME json_test)
+add_module(NAME json TARGETS json)
+add_module(NAME json_test TARGETS "")
 
 #add_subdirectory(doc)

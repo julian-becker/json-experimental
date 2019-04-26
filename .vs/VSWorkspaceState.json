@@ -1,0 +1,12 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\cmake",
+    "\\json",
+    "\\json\\src",
+    "\\json_test",
+    "\\json_test\\src"
+  ],
+  "SelectedNode": "\\json\\src\\library_main.cpp",
+  "PreviewInSolutionExplorer": false
+}
