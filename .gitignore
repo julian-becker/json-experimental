@@ -1,0 +1,11 @@
+build
+*.o
+*.obj
+*.bin
+*.exe
+*.so
+*.VC.opendb
+*.VC.db
+.suo
+*.sqlite
+ipch
