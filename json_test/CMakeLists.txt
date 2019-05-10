@@ -7,7 +7,7 @@ find_package(json REQUIRED)
 macro(add_test_catch TEST_NAME)
 	cmake_parse_arguments(ADD_TEST "" "" "SOURCES" ${ARGN})
 
-	message("Adding test ${PROJECT_NAME}.${TEST_NAME}")
+	message("Register test target ${PROJECT_NAME}.${TEST_NAME}")
 	add_executable(${PROJECT_NAME}.${TEST_NAME}
 		src/main.cpp
 		${ADD_TEST_SOURCES}

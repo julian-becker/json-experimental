@@ -2,5 +2,4 @@
 
 TEST_CASE("test2", "[json_api_foobar]") {
 	REQUIRE(true);
-
 }

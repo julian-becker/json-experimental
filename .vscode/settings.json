@@ -1,0 +1,9 @@
+{
+    //"C_Cpp.default.configurationProvider": "vector-of-bool.cmake-tools",
+    "C_Cpp.loggingLevel": "Debug",
+    // "C_Cpp.intelliSenseEngine":"Disabled",
+    "cmake.configureOnOpen": true,
+    "files.associations": {
+        "variant": "cpp"
+    }
+}
