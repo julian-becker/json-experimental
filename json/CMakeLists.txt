@@ -4,7 +4,10 @@ project(json
   VERSION 0.1.0
 )
 
-add_library(${PROJECT_NAME} src/library_main.cpp)
+add_library(${PROJECT_NAME}
+  src/library_main.cpp
+)
+
 add_library(${PROJECT_NAME}::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_17)
 
