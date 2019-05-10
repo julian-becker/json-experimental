@@ -1,5 +1,8 @@
 cmake_minimum_required(VERSION 3.5)
-project(json LANGUAGES CXX)
+project(json
+  LANGUAGES CXX
+  VERSION 0.1.0
+)
 
 add_library(${PROJECT_NAME} src/library_main.cpp)
 add_library(${PROJECT_NAME}::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
@@ -15,6 +18,12 @@ include(GenerateExportHeader)
 generate_export_header(${PROJECT_NAME}
   EXPORT_FILE_NAME ${CMAKE_BINARY_DIR}/include/${PROJECT_NAME}/export.h
   EXPORT_MACRO_NAME JSON_API
+)
+
+include(GenerateVersionHeader)
+generate_version_header(
+  PROJECT_NAME ${PROJECT_NAME}
+  HEADER_FILE_NAME ${CMAKE_BINARY_DIR}/include/${PROJECT_NAME}/version.h
 )
 
 include(GNUInstallDirs)
