@@ -217,8 +217,14 @@ class JsonValue {
     constexpr JsonValue(JsonNull) noexcept
       : m_value{JsonNull{}} {}
 
+    constexpr JsonValue(std::nullptr_t) noexcept
+      : m_value{JsonNull{}} {}
+
     constexpr JsonValue(JsonBoolean boolean)
       : m_value{std::move(boolean)} {}
+
+    constexpr JsonValue(bool boolean)
+      : m_value{JsonBoolean{std::move(boolean)}} {}
 
     constexpr JsonValue(JsonNumber number)
       : m_value{std::move(number)} {}
