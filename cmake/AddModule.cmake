@@ -27,7 +27,7 @@ macro(add_module)
   foreach(_TARGET ${ADD_MODULE_TARGETS})
     export(TARGETS ${_TARGET} FILE "${PROJECT_BINARY_DIR}/targets/${ADD_MODULE_NAME}_${_TARGET}Targets.cmake" )
 
-    file(APPEND "${PROJECT_BINARY_DIR}/cmake/Find${ADD_MODULE_NAME}.cmake.in" "
+    file(APPEND "${PROJECT_BINARY_DIR}/cmake/${ADD_MODULE_NAME}Config.cmake.in" "
       if(NOT TARGET ${_TARGET})
         include(${PROJECT_BINARY_DIR}/targets/${ADD_MODULE_NAME}_${_TARGET}Targets.cmake )
       endif()
@@ -35,7 +35,7 @@ macro(add_module)
 
     configure_file(
     	"${PROJECT_BINARY_DIR}/cmake/${ADD_MODULE_NAME}Config.cmake.in"
-    	"${PROJECT_BINARY_DIR}/modules/Find${ADD_MODULE_NAME}.cmake"
+    	"${PROJECT_BINARY_DIR}/modules/${ADD_MODULE_NAME}Config.cmake"
     )
   endforeach(_TARGET)
   unset(ADD_MODULE_DIRECTORY)
