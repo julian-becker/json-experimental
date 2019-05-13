@@ -1,6 +1,7 @@
 #pragma once
 #include <algorithm>
 #include <cstddef>
+#include <iterator>
 #include <json/export.h>
 #include <map>
 #include <variant>
@@ -39,22 +40,63 @@ class JsonNumber;
 template <typename> class JsonString;
 
 class JsonArray;
-class JsonObject;
+template <typename = JsonValue> class JsonObject;
 class JsonValue;
-class JsonObjectIterator;
+template <typename> class JsonObjectIterator;
 
-class JsonObject {
-    std::map<std::string, JsonValue> m_dict;
+template <typename IteratorImpl>
+class JsonObjectIterator
+  : public std::iterator<typename IteratorImpl::iterator_category, // iterator_category
+                         typename IteratorImpl::value_type, typename IteratorImpl::difference_type,
+                         typename IteratorImpl::pointer, typename IteratorImpl::reference> {
+    IteratorImpl m_it;
 
   public:
-    void insert(std::string const &key, JsonValue const &value);
+    JsonObjectIterator(IteratorImpl it)
+      : m_it{std::move(it)} {}
 
+    JsonObjectIterator(JsonObjectIterator const &) = default;
+    JsonObjectIterator(JsonObjectIterator &&)      = default;
+    JsonObjectIterator &operator=(JsonObjectIterator const &) = default;
+    JsonObjectIterator &operator=(JsonObjectIterator &&) = default;
+
+    friend auto operator==(JsonObjectIterator const &a, JsonObjectIterator const &b) -> bool {
+        return a.m_it == b.m_it;
+    }
+
+    friend auto operator!=(JsonObjectIterator const &a, JsonObjectIterator const &b) -> bool {
+        return !(a == b);
+    }
+
+    auto operator++() -> JsonObjectIterator & {
+        ++m_it;
+        return *this;
+    }
+
+    auto operator++(int) -> JsonObjectIterator & {
+        auto copy(*this);
+        ++m_it;
+        return copy;
+    }
+
+    auto operator*() const { return *m_it; }
+};
+
+template <typename MappedType> class JsonObject {
+    using mapped_type = MappedType;
+    std::map<std::string, mapped_type> m_dict;
+
+  public:
     auto size() const -> std::size_t { return m_dict.size(); }
 
-    auto at(std::string const &key) const -> JsonValue;
+    void insert(std::string const &key, mapped_type const &value) {
+        m_dict.insert(std::make_pair(key, value));
+    }
 
-    auto begin() const -> JsonObjectIterator;
-    auto end() const -> JsonObjectIterator;
+    auto at(std::string const &key) const -> mapped_type { return m_dict.at(key); }
+
+    auto begin() const { return JsonObjectIterator{m_dict.begin()}; }
+    auto end() const { return JsonObjectIterator{m_dict.end()}; }
 
     friend constexpr auto operator==(const JsonObject &a, const JsonObject &b) -> bool {
         return true;
@@ -190,7 +232,7 @@ JsonString()->JsonString<JsonStringStaticTag>;
 class JsonValue {
 
     std::variant<JsonNull, JsonBoolean, JsonNumber, JsonString<JsonStringStaticTag>,
-                 JsonString<JsonStringDynamicTag>, JsonArray, JsonObject>
+                 JsonString<JsonStringDynamicTag>, JsonArray, JsonObject<JsonValue>>
         m_value;
 
   public:
@@ -218,48 +260,5 @@ class JsonValue {
         return !(a == b);
     }
 };
-
-void JsonObject::insert(std::string const &key, JsonValue const &value) {
-    m_dict.insert(std::make_pair(key, value));
-}
-
-auto JsonObject::at(std::string const &key) const -> JsonValue { return m_dict.at(key); }
-
-class JsonObjectIterator {
-    std::map<std::string, JsonValue>::const_iterator m_it;
-
-  public:
-    JsonObjectIterator(std::map<std::string, JsonValue>::const_iterator it)
-      : m_it{std::move(it)} {}
-
-    JsonObjectIterator(JsonObjectIterator const &) = default;
-    JsonObjectIterator(JsonObjectIterator &&)      = default;
-    JsonObjectIterator &operator=(JsonObjectIterator const &) = default;
-    JsonObjectIterator &operator=(JsonObjectIterator &&) = default;
-
-    friend auto operator==(JsonObjectIterator const &a, JsonObjectIterator const &b) -> bool {
-        return a.m_it == b.m_it;
-    }
-
-    friend auto operator!=(JsonObjectIterator const &a, JsonObjectIterator const &b) -> bool {
-        return !(a == b);
-    }
-
-    auto operator++() -> JsonObjectIterator & {
-        ++m_it;
-        return *this;
-    }
-
-    auto operator++(int) -> JsonObjectIterator & {
-        auto copy(*this);
-        ++m_it;
-        return copy;
-    }
-
-    auto operator*() const -> std::pair<std::string, JsonValue> { return *m_it; }
-};
-
-auto JsonObject::begin() const -> JsonObjectIterator { return JsonObjectIterator(m_dict.begin()); }
-auto JsonObject::end() const -> JsonObjectIterator { return JsonObjectIterator(m_dict.end()); }
 
 } // namespace json
