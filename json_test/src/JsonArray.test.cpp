@@ -6,6 +6,20 @@ using namespace json;
 TEST_CASE("Creating JsonArray", "[JsonArray]") {
     SECTION("JsonArray can be default constructed") { JsonArray{}; }
 
+    GIVEN("three JsonValue instances") {
+        auto someJsonVal0 = JsonValue{JsonNumber{42}};
+        auto someJsonVal1 = JsonValue{JsonNumber{12345}};
+        auto someJsonVal2 = JsonValue{JsonNull{}};
+        WHEN("A JsonArray is brace-initialized from these instances") {
+            auto result = JsonArray{someJsonVal0, someJsonVal1, someJsonVal2};
+            THEN("accessing the elements via .at() produces their values") {
+                CHECK(someJsonVal0 == result.at(0));
+                CHECK(someJsonVal1 == result.at(1));
+                CHECK(someJsonVal2 == result.at(2));
+            }
+        }
+    }
+
     GIVEN("A default constructed JsonArray") {
         auto obj          = JsonArray{};
         auto someJsonVal  = JsonValue{JsonNumber{42}};
@@ -46,7 +60,7 @@ TEST_CASE("Looping over member-attributes of JsonArray", "[JsonArray]") {
             std::size_t numFoundEntries{0u};
             JsonValue   foundVal1, foundVal2, foundLastVal;
 
-            for (const auto &entry : obj) {
+            for (const auto& entry : obj) {
                 if (numFoundEntries == 0u) {
                     foundVal1 = entry;
                 } else if (numFoundEntries == 1u) {
