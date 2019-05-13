@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <cstddef>
 #include <json/export.h>
+#include <map>
 #include <variant>
 
 #define TODO                                                                                       \
@@ -42,7 +43,15 @@ class JsonObject;
 class JsonValue;
 
 class JsonObject {
+    std::map<std::string, JsonValue> m_dict;
+
   public:
+    void insert(std::string const &key, JsonValue const &value);
+
+    auto size() const -> std::size_t { return m_dict.size(); }
+
+    auto at(std::string const &key) const -> JsonValue;
+
     friend constexpr auto operator==(const JsonObject &a, const JsonObject &b) -> bool {
         return true;
     }
@@ -190,6 +199,9 @@ class JsonValue {
     constexpr JsonValue(JsonBoolean boolean)
       : m_value{std::move(boolean)} {}
 
+    JsonValue(JsonNumber number)
+      : m_value{std::move(number)} {}
+
     constexpr friend bool operator==(JsonValue const &a, JsonValue const &b) {
         if (a.m_value.index() != b.m_value.index())
             return false;
@@ -202,5 +214,11 @@ class JsonValue {
         return !(a == b);
     }
 };
+
+void JsonObject::insert(std::string const &key, JsonValue const &value) {
+    m_dict.insert(std::make_pair(key, value));
+}
+
+auto JsonObject::at(std::string const &key) const -> JsonValue { return m_dict.at(key); }
 
 } // namespace json

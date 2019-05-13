@@ -14,7 +14,7 @@ macro(add_test_catch TEST_NAME)
 	)
 
 	target_compile_features(${PROJECT_NAME}.${TEST_NAME} PRIVATE cxx_std_17)
-
+	
 	target_link_libraries(${PROJECT_NAME}.${TEST_NAME}
 	  PRIVATE
 		json::json
