@@ -5,6 +5,7 @@
 #include <json/export.h>
 #include <map>
 #include <variant>
+#include <vector>
 
 #define TODO                                                                                       \
     { throw; }
@@ -39,7 +40,7 @@ class JsonBool;
 class JsonNumber;
 template <typename> class JsonString;
 
-class JsonArray;
+template <typename = JsonValue> class JsonArray;
 template <typename = JsonValue> class JsonObject;
 class JsonValue;
 
@@ -108,8 +109,19 @@ class JsonBoolean : public WithConversion<JsonBoolean, JsonValue> {
     constexpr operator bool() const { return m_value; }
 };
 
-class JsonArray {
+template <typename ValueType> class JsonArray {
+    using value_type = ValueType;
+    std::vector<value_type> m_values;
+
   public:
+    template <typename T> void push_back(T &&value) { m_values.push_back(std::forward<T>(value)); }
+    auto at(std::size_t index) const -> ValueType const & { return m_values.at(index); }
+    auto at(std::size_t index) -> ValueType & { return m_values.at(index); }
+
+    auto begin() const { return m_values.begin(); }
+    auto end() const { return m_values.end(); }
+
+    auto                  size() const { return m_values.size(); }
     friend constexpr auto operator==(const JsonArray &a, const JsonArray &b) -> bool {
         return true;
     }
@@ -193,7 +205,7 @@ JsonString()->JsonString<JsonStringStaticTag>;
 class JsonValue {
 
     std::variant<JsonNull, JsonBoolean, JsonNumber, JsonString<JsonStringStaticTag>,
-                 JsonString<JsonStringDynamicTag>, JsonArray, JsonObject<JsonValue>>
+                 JsonString<JsonStringDynamicTag>, JsonArray<JsonValue>, JsonObject<JsonValue>>
         m_value;
 
   public:
