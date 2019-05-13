@@ -21,6 +21,17 @@ struct WithConversion : public CRTP<Derived> {
     constexpr operator ConversionTarget() const { return ConversionTarget{self()}; }
 };
 
+struct CompareForEqualityVisitor {
+    template <typename T>
+    constexpr auto operator()(T const &a, T const &b) const noexcept(noexcept(a == b)) -> bool {
+        return a == b;
+    }
+    template <typename T, typename U>
+    constexpr auto operator()(T const &a, U const &b) const noexcept -> bool {
+        return false;
+    }
+};
+
 class JsonNull;
 class JsonBool;
 class JsonNumber;
@@ -42,9 +53,17 @@ class JsonObject {
 };
 
 class JsonNumber {
+    std::variant<int, double> m_value;
+
   public:
+    JsonNumber(int value)
+      : m_value{std::move(value)} {}
+
+    JsonNumber(double value)
+      : m_value{std::move(value)} {}
+
     friend constexpr auto operator==(const JsonNumber &a, const JsonNumber &b) -> bool {
-        return true;
+        return std::visit(CompareForEqualityVisitor{}, a.m_value, b.m_value);
     }
 
     friend constexpr auto operator!=(const JsonNumber &a, const JsonNumber &b) -> bool {
@@ -156,16 +175,7 @@ JsonString(std::string)->JsonString<JsonStringDynamicTag>;
 JsonString()->JsonString<JsonStringStaticTag>;
 
 class JsonValue {
-    struct CompareForEqualityVisitor {
-        template <typename T>
-        constexpr auto operator()(T const &a, T const &b) const noexcept(noexcept(a == b)) -> bool {
-            return a == b;
-        }
-        template <typename T, typename U>
-        constexpr auto operator()(T const &a, U const &b) const noexcept -> bool {
-            return false;
-        }
-    };
+
     std::variant<JsonNull, JsonBoolean, JsonNumber, JsonString<JsonStringStaticTag>,
                  JsonString<JsonStringDynamicTag>, JsonArray, JsonObject>
         m_value;
