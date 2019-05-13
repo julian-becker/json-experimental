@@ -42,45 +42,6 @@ template <typename> class JsonString;
 class JsonArray;
 template <typename = JsonValue> class JsonObject;
 class JsonValue;
-template <typename> class JsonObjectIterator;
-
-template <typename IteratorImpl>
-class JsonObjectIterator
-  : public std::iterator<typename IteratorImpl::iterator_category, // iterator_category
-                         typename IteratorImpl::value_type, typename IteratorImpl::difference_type,
-                         typename IteratorImpl::pointer, typename IteratorImpl::reference> {
-    IteratorImpl m_it;
-
-  public:
-    JsonObjectIterator(IteratorImpl it)
-      : m_it{std::move(it)} {}
-
-    JsonObjectIterator(JsonObjectIterator const &) = default;
-    JsonObjectIterator(JsonObjectIterator &&)      = default;
-    JsonObjectIterator &operator=(JsonObjectIterator const &) = default;
-    JsonObjectIterator &operator=(JsonObjectIterator &&) = default;
-
-    friend auto operator==(JsonObjectIterator const &a, JsonObjectIterator const &b) -> bool {
-        return a.m_it == b.m_it;
-    }
-
-    friend auto operator!=(JsonObjectIterator const &a, JsonObjectIterator const &b) -> bool {
-        return !(a == b);
-    }
-
-    auto operator++() -> JsonObjectIterator & {
-        ++m_it;
-        return *this;
-    }
-
-    auto operator++(int) -> JsonObjectIterator & {
-        auto copy(*this);
-        ++m_it;
-        return copy;
-    }
-
-    auto operator*() const { return *m_it; }
-};
 
 template <typename MappedType> class JsonObject {
     using mapped_type = MappedType;
@@ -95,8 +56,8 @@ template <typename MappedType> class JsonObject {
 
     auto at(std::string const &key) const -> mapped_type { return m_dict.at(key); }
 
-    auto begin() const { return JsonObjectIterator{m_dict.begin()}; }
-    auto end() const { return JsonObjectIterator{m_dict.end()}; }
+    auto begin() const { return m_dict.begin(); }
+    auto end() const { return m_dict.end(); }
 
     friend constexpr auto operator==(const JsonObject &a, const JsonObject &b) -> bool {
         return true;
