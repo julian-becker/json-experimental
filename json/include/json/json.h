@@ -41,6 +41,7 @@ template <typename> class JsonString;
 class JsonArray;
 class JsonObject;
 class JsonValue;
+class JsonObjectIterator;
 
 class JsonObject {
     std::map<std::string, JsonValue> m_dict;
@@ -51,6 +52,9 @@ class JsonObject {
     auto size() const -> std::size_t { return m_dict.size(); }
 
     auto at(std::string const &key) const -> JsonValue;
+
+    auto begin() const -> JsonObjectIterator;
+    auto end() const -> JsonObjectIterator;
 
     friend constexpr auto operator==(const JsonObject &a, const JsonObject &b) -> bool {
         return true;
@@ -220,5 +224,42 @@ void JsonObject::insert(std::string const &key, JsonValue const &value) {
 }
 
 auto JsonObject::at(std::string const &key) const -> JsonValue { return m_dict.at(key); }
+
+class JsonObjectIterator {
+    std::map<std::string, JsonValue>::const_iterator m_it;
+
+  public:
+    JsonObjectIterator(std::map<std::string, JsonValue>::const_iterator it)
+      : m_it{std::move(it)} {}
+
+    JsonObjectIterator(JsonObjectIterator const &) = default;
+    JsonObjectIterator(JsonObjectIterator &&)      = default;
+    JsonObjectIterator &operator=(JsonObjectIterator const &) = default;
+    JsonObjectIterator &operator=(JsonObjectIterator &&) = default;
+
+    friend auto operator==(JsonObjectIterator const &a, JsonObjectIterator const &b) -> bool {
+        return a.m_it == b.m_it;
+    }
+
+    friend auto operator!=(JsonObjectIterator const &a, JsonObjectIterator const &b) -> bool {
+        return !(a == b);
+    }
+
+    auto operator++() -> JsonObjectIterator & {
+        ++m_it;
+        return *this;
+    }
+
+    auto operator++(int) -> JsonObjectIterator & {
+        auto copy(*this);
+        ++m_it;
+        return copy;
+    }
+
+    auto operator*() const -> std::pair<std::string, JsonValue> { return *m_it; }
+};
+
+auto JsonObject::begin() const -> JsonObjectIterator { return JsonObjectIterator(m_dict.begin()); }
+auto JsonObject::end() const -> JsonObjectIterator { return JsonObjectIterator(m_dict.end()); }
 
 } // namespace json
