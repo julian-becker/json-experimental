@@ -102,7 +102,7 @@ template <> class JsonString<JsonStringDynamicTag> {
     std::string m_value;
 
   public:
-    JsonString() = default;
+    JsonString() noexcept(std::is_nothrow_constructible_v<std::string>) = default;
 
     template <typename T>
     JsonString(T &&value)
@@ -120,11 +120,11 @@ template <> class JsonString<JsonStringStaticTag> {
     std::size_t m_size;
 
   public:
-    constexpr JsonString()
+    constexpr JsonString() noexcept
       : m_value{nullptr}
       , m_size{0u} {}
 
-    constexpr JsonString(char const *value, std::size_t size)
+    constexpr JsonString(char const *value, std::size_t size) noexcept
       : m_value{std::move(value)}
       , m_size{std::move(size)} {}
 
@@ -133,7 +133,7 @@ template <> class JsonString<JsonStringStaticTag> {
       : m_value{literal}
       , m_size{N} {}
 
-    friend constexpr auto operator==(const JsonString &a, const JsonString &b) -> bool {
+    friend constexpr auto operator==(const JsonString &a, const JsonString &b) noexcept -> bool {
         if (a.m_size != b.m_size)
             return false;
 
@@ -144,11 +144,11 @@ template <> class JsonString<JsonStringStaticTag> {
         return true;
     }
 
-    friend constexpr auto operator!=(const JsonString &a, const JsonString &b) -> bool {
+    friend constexpr auto operator!=(const JsonString &a, const JsonString &b) noexcept -> bool {
         return !(a == b);
     }
 
-    constexpr operator bool() const { return m_value != nullptr; }
+    constexpr operator bool() const noexcept { return m_value != nullptr; }
 };
 
 template <std::size_t N> JsonString(const char (&literal)[N])->JsonString<JsonStringStaticTag>;
@@ -157,11 +157,12 @@ JsonString()->JsonString<JsonStringStaticTag>;
 
 class JsonValue {
     struct CompareForEqualityVisitor {
-        template <typename T> constexpr auto operator()(T const &a, T const &b) const -> bool {
+        template <typename T>
+        constexpr auto operator()(T const &a, T const &b) const noexcept(noexcept(a == b)) -> bool {
             return a == b;
         }
         template <typename T, typename U>
-        constexpr auto operator()(T const &a, U const &b) const -> bool {
+        constexpr auto operator()(T const &a, U const &b) const noexcept -> bool {
             return false;
         }
     };
@@ -170,23 +171,24 @@ class JsonValue {
         m_value;
 
   public:
-    constexpr JsonValue()
+    constexpr JsonValue() noexcept
       : m_value{JsonNull{}} {};
 
-    constexpr JsonValue(JsonNull)
+    constexpr JsonValue(JsonNull) noexcept
       : m_value{JsonNull{}} {}
 
     constexpr JsonValue(JsonBoolean boolean)
       : m_value{std::move(boolean)} {}
 
-    constexpr friend bool operator==(JsonValue const &a, JsonValue const &b) noexcept {
+    constexpr friend bool operator==(JsonValue const &a, JsonValue const &b) {
         if (a.m_value.index() != b.m_value.index())
             return false;
 
         return std::visit(CompareForEqualityVisitor{}, a.m_value, b.m_value);
     }
 
-    constexpr friend bool operator!=(JsonValue const &a, JsonValue const &b) noexcept {
+    constexpr friend bool operator!=(JsonValue const &a,
+                                     JsonValue const &b) noexcept(noexcept(!(a == b))) {
         return !(a == b);
     }
 };

@@ -48,9 +48,14 @@ TEST_CASE("Creating JsonBoolean instance", "[JsonBoolean]") {
 }
 
 TEST_CASE("Creating a JsonString instance", "[JsonString]") {
-    SECTION("Default construction") { JsonString{}; }
+    SECTION("Default construction") {
+        JsonString{};
+        static_assert(JsonString{} == JsonString{});
+        static_assert(!(JsonString{} != JsonString{}));
+    }
 
     SECTION("Construction from string-literal at compile-time") {
+
         static_assert(JsonString{"123"} == JsonString{"123"});
         static_assert(!(JsonString{"123"} != JsonString{"123"}));
 
